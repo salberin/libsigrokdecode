@@ -21,20 +21,15 @@
 
 import sigrokdecode as srd
 
-
-# Return the specified BCD number (max. 8 bits) as integer.
-def bcd2int(b):
-    return (b & 0x0f) + ((b >> 4) * 10)
-
 class Decoder(srd.Decoder):
     api_version = 2
-    id = 'tca6408'
+    id = 'tca6408a'
     name = 'TCA6408a'
     longname = 'TI TCA6408a'
     desc = 'I/O expander.'
     license = 'gplv2+'
     inputs = ['i2c']
-    outputs = ['tca6408']
+    outputs = ['tca6408a']
     annotations = (
         ('register', 'Register type'),
         ('reg value', 'Human-readable text'),
