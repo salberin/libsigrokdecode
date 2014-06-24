@@ -70,9 +70,9 @@ class Decoder(srd.Decoder):
             self.putx([0, ['Configuration register', 'Conf', 'C']])
         
     def check_correct_chip(self, addr): # Check if we are decoding a io expander
-        if addr not in range(0x20, 0x20 + 1):
-            s = 'Warning: I²C slave 0x%02x not an TCA6408a compatible sensor.'
-            self.putx([2, [s % addr]])
+        if  not (addr == 0x20 or addr == 0x21): 
+            self.putx([2, ['Warning: I²C slave 0x%02x not an TCA6408a compatible chip.' % addr]])
+            self.state = 'IDLE'
 
     def decode(self, ss, es, data):
         cmd, databyte = data
@@ -90,13 +90,12 @@ class Decoder(srd.Decoder):
         elif self.state == 'GET SLAVE ADDR':
             # Wait for an address write operation.
             # TODO: We should only handle packets to the RTC slave (0x68).
-            self.chip = databyte            
-            if cmd in ('ADDRESS READ', 'ADDRESS WRITE'):
-                self.check_correct_chip(databyte)
-                #self.state = cmd[8:] + ' REGS' # READ REGS / WRITE REGS
+            self.chip = databyte  
             self.state = 'GET REG ADDR'
         elif self.state == 'GET REG ADDR':
             # Wait for a data write (master selects the slave register).
+            if (cmd == 'ADDRESS READ' or cmd == 'ADDRESS WRITE'):
+              self.check_correct_chip(databyte)
             if cmd != 'DATA WRITE':
                 return
             self.reg = databyte
